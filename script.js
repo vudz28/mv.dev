@@ -286,4 +286,38 @@
       }, { once: true });
     }, { passive: true });
   }
+
+  // Start screen: reveal the existing website and attempt music playback
+  const startScreen = $("startScreen");
+  const startButton = $("startButton");
+  const backgroundMusic = $("backgroundMusic");
+
+  function startWebsite() {
+    if (startScreen) {
+      startScreen.classList.add("is-leaving");
+
+      // Remove overlay after the transition finishes
+      window.setTimeout(() => {
+        startScreen.remove();
+      }, 750);
+    }
+
+    if (backgroundMusic) {
+      backgroundMusic.volume = 0.35;
+      backgroundMusic.play().catch(() => {
+        // Playback may fail if the audio URL is not a direct audio file.
+      });
+    }
+  }
+
+  if (startScreen) {
+    startScreen.addEventListener("click", startWebsite, { once: true });
+  }
+
+  if (startButton) {
+    startButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      startWebsite();
+    }, { once: true });
+  }  
 })();
