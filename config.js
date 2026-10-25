@@ -6,7 +6,7 @@ window.CONFIG = {
 
   bannerUrl: "https://i.pinimg.com/736x/da/09/ed/da09edb81c790549db8980a5aa976dec.jpg",
   musicCoverUrl: "https://i.ytimg.com/vi/W4UeUJA9wLU/maxresdefault.jpg",
-  musicAudioUrl: "https://vudz28.github.io/mv.dev/music.mp3",
+  musicAudioUrl: "https://github.com/vudz28/mv.dev/blob/main/music.mp3",
   musicTitle: "Wrong Times ( ft. FOWLEX Snowz )",
   musicArtist: "Dangrangto",
 
