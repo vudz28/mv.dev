@@ -6,7 +6,7 @@ window.CONFIG = {
 
   bannerUrl: "https://i.pinimg.com/736x/da/09/ed/da09edb81c790549db8980a5aa976dec.jpg",
   musicCoverUrl: "https://i.ytimg.com/vi/W4UeUJA9wLU/maxresdefault.jpg",
-  musicAudioUrl: "https://github.com/vudz28/mv.dev/blob/main/PUPPY%20%26%20DANGRANGTO%20-%20WRONG%20TIMES%20%20Live%20at%20LAB%20RADAR%20%20ZLAB%20-%20ZLAB.mp3",
+  musicAudioUrl: "https://vudz28.github.io/mv.dev/music.mp3",
   musicTitle: "Wrong Times ( ft. FOWLEX Snowz )",
   musicArtist: "Dangrangto",
 
