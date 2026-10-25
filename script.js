@@ -6,7 +6,7 @@
   const $ = (selector) => document.querySelector(selector);
 
   // ==========================================
-  // 1. HÀM DÙNG CHUNG
+  // 1. CÁC HÀM DÙNG CHUNG
   // ==========================================
 
   function safeUrl(value) {
@@ -17,52 +17,64 @@
       if (url.protocol === "https:" || url.protocol === "http:") {
         return url.href;
       }
-    } catch (_) {}
+    } catch (error) {
+      console.warn("URL không hợp lệ:", value);
+    }
 
     return "";
   }
 
   function setText(selector, value) {
     const element = $(selector);
+
     if (element && value !== undefined && value !== null) {
       element.textContent = value;
     }
   }
 
-  function setImage(selector, url) {
+  function setImage(selector, value) {
     const element = $(selector);
-    const validUrl = safeUrl(url);
+    const url = safeUrl(value);
 
-    if (element && validUrl) {
-      element.src = validUrl;
-      element.style.display = "";
+    if (!element || !url) return;
+
+    element.onerror = () => {
+      console.warn("Không tải được ảnh:", url);
+      element.dataset.imageError = "true";
+    };
+
+    element.onload = () => {
+      delete element.dataset.imageError;
+    };
+
+    if (element.src !== url) {
+      element.src = url;
     }
+
+    element.style.display = "";
   }
 
-  function setLink(selector, url) {
+  function setLink(selector, value) {
     const element = $(selector);
-    const validUrl = safeUrl(url);
+    const url = safeUrl(value);
 
-    if (element && validUrl) {
-      element.href = validUrl;
-      element.target = "_blank";
-      element.rel = "noopener noreferrer";
-    }
+    if (!element || !url) return;
+
+    element.href = url;
+    element.target = "_blank";
+    element.rel = "noopener noreferrer";
   }
 
   // ==========================================
-  // 2. THÔNG TIN CÁ NHÂN
+  // 2. THÔNG TIN HỒ SƠ
   // ==========================================
 
-  setText("#displayName", config.displayName || "Minh Vũ");
+  setText("#displayName", config.displayName || "mvu");
   setText("#handle", config.handle || "@.minhhvu");
-  setText(
-    "#bio",
-    config.bio || "Backend Developer • Learning something new every day"
-  );
+  setText("#bio", config.bio || "Backend Developer");
 
   // ==========================================
-  // 3. NỀN WEBSITE VÀ BANNER
+  // 3. NỀN, BANNER VÀ ẢNH BÌA
   // ==========================================
 
   const background = $("#background");
@@ -75,12 +87,12 @@
     background.style.backgroundRepeat = "no-repeat";
   }
 
-  // Dùng đúng ID trong index.html
+  // Đúng ID trong index.html
   setImage("#bannerImage", config.bannerUrl);
   setImage("#musicCover", config.musicCoverUrl);
 
   // ==========================================
-  // 4. CÁC LIÊN KẾT MẠNG XÃ HỘI
+  // 4. LIÊN KẾT MẠNG XÃ HỘI
   // ==========================================
 
   setLink("#discordLink", config.discordUrl);
@@ -93,6 +105,9 @@
 
   const audio = $("#backgroundMusic");
 
+  setText("#musicTitle", config.musicTitle || "Your Favorite Song");
+  setText("#musicArtist", config.musicArtist || "Your Favorite Artist");
+
   if (audio) {
     const audioUrl = safeUrl(config.musicAudioUrl);
 
@@ -100,13 +115,13 @@
     audio.loop = true;
     audio.volume = 0.5;
     audio.preload = "auto";
+    audio.autoplay = false;
 
     if (audioUrl) {
       audio.src = audioUrl;
       audio.load();
     }
 
-    // Cập nhật chỉ báo nhạc nếu có
     audio.addEventListener("play", () => {
       document.body.classList.add("music-playing");
     });
@@ -117,22 +132,17 @@
 
     audio.addEventListener("error", () => {
       console.error(
-        "Không tải được nhạc. Hãy kiểm tra musicAudioUrl trong config.js."
+        "Lỗi tải nhạc. Hãy kiểm tra file music.mp3 và musicAudioUrl."
       );
     });
   }
 
-  // Thông tin bài nhạc mặc định
-  setText("#musicTitle", config.musicTitle || "Your Favorite Song");
-  setText("#musicArtist", config.musicArtist || "Your Favorite Artist");
-
   // ==========================================
-  // 6. MÀN HÌNH CHỜ - CLICK TO START
+  // 6. NÚT CLICK TO START
   // ==========================================
 
   const startScreen = $("#startScreen");
   const startButton = $("#startButton");
-
   let started = false;
 
   async function startWebsite(event) {
@@ -141,23 +151,19 @@
 
     started = true;
 
-    // Bắt đầu phát nhạc từ thao tác click
-    if (audio && audio.getAttribute("src")) {
+    // Gọi play() ngay trong thao tác click
+    if (audio && audio.src) {
       try {
         await audio.play();
         console.log("Nhạc nền đang phát.");
       } catch (error) {
-        console.error("Không thể phát nhạc:", error);
-        started = false;
+        console.error("Không phát được nhạc:", error);
       }
     } else {
-      console.error(
-        "Chưa có file nhạc. Hãy kiểm tra musicAudioUrl trong config.js."
-      );
-      started = false;
+      console.error("Chưa cấu hình file nhạc hợp lệ.");
     }
 
-    // Dù nhạc có phát được hay không, vẫn cho phép vào website
+    // Luôn đóng màn hình chờ dù nhạc có lỗi
     if (startScreen) {
       startScreen.classList.add("is-leaving");
 
@@ -172,7 +178,7 @@
   }
 
   // ==========================================
-  // 7. DISCORD PROFILE - LANYARD API
+  // 7. DISCORD PROFILE
   // ==========================================
 
   async function loadDiscord() {
@@ -195,24 +201,34 @@
       const result = await response.json();
 
       if (!result.success || !result.data) {
-        throw new Error("Không lấy được dữ liệu Discord.");
+        throw new Error("Không có dữ liệu Discord");
       }
 
       const data = result.data;
       const user = data.discord_user || {};
 
-      // Avatar Discord
+      // Avatar: ID đúng là #avatar
       if (user.id && user.avatar) {
-        const extension = user.avatar.startsWith("a_") ? "gif" : "png";
+        const extension = user.avatar.startsWith("a_")
+          ? "gif"
+          : "png";
 
         setImage(
           "#avatar",
           `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${extension}?size=256`
         );
+      } else if (user.id) {
+        const defaultIndex = Number(user.discriminator || 0) % 6;
+
+        setImage(
+          "#avatar",
+          `https://cdn.discordapp.com/embed/avatars/${defaultIndex}.png`
+        );
       }
 
-      // Nếu không có avatar Discord, giữ ảnh hiện có
       // Trạng thái Discord
+      const status = data.discord_status || "offline";
+
       const statusNames = {
         online: "Online",
         idle: "Idle",
@@ -220,23 +236,22 @@
         offline: "Offline"
       };
 
-      const status = data.discord_status || "offline";
-
       setText("#discordStatus", statusNames[status] || "Offline");
-
-      const statusElement = $("#discordStatus");
-      if (statusElement) {
-        statusElement.dataset.status = status;
-      }
 
       const activityDot = $("#activityDot");
 
       if (activityDot) {
-        activityDot.classList.remove("online", "idle", "dnd", "offline");
+        activityDot.classList.remove(
+          "online",
+          "idle",
+          "dnd",
+          "offline"
+        );
+
         activityDot.classList.add(status);
       }
 
-      // Hoạt động Discord
+      // Hoạt động hiện tại
       const activities = data.activities || [];
 
       const activity = activities.find(
@@ -271,61 +286,14 @@
         }
       }
 
-      console.log("Đã cập nhật thông tin Discord.");
+      console.log("Đã tải dữ liệu Discord.");
     } catch (error) {
-      console.warn("Không thể tải dữ liệu Discord:", error);
+      console.warn("Không tải được Discord:", error);
       setText("#discordStatus", "Discord không khả dụng");
     }
   }
 
   loadDiscord();
 
-  // ==========================================
-  // 8. HIỆU ỨNG HẠT THEO CHUỘT
-  // ==========================================
-
-  let lastParticleTime = 0;
-
-  document.addEventListener("pointermove", (event) => {
-    const now = Date.now();
-
-    // Giới hạn số hạt để tránh làm chậm website
-    if (now - lastParticleTime < 35) return;
-    lastParticleTime = now;
-
-    const particle = document.createElement("span");
-    particle.className = "mouse-particle";
-
-    particle.style.position = "fixed";
-    particle.style.left = `${event.clientX}px`;
-    particle.style.top = `${event.clientY}px`;
-    particle.style.width = "5px";
-    particle.style.height = "5px";
-    particle.style.borderRadius = "50%";
-    particle.style.background = "#a78bfa";
-    particle.style.boxShadow = "0 0 10px #8b5cf6";
-    particle.style.pointerEvents = "none";
-    particle.style.zIndex = "99999";
-    particle.style.transform = "translate(-50%, -50%)";
-    particle.style.animation = "mouseParticleFade 600ms ease-out forwards";
-
-    document.body.appendChild(particle);
-
-    window.setTimeout(() => particle.remove(), 650);
-  });
-
-  // ==========================================
-  // 9. BẢO VỆ LỖI ẢNH
-  // ==========================================
-
-  document.querySelectorAll("img").forEach((image) => {
-    image.addEventListener("error", () => {
-      console.warn("Không tải được ảnh:", image.src);
-
-      // Không ẩn avatar/banner tự động để tránh làm lệch giao diện
-      image.dataset.imageError = "true";
-    });
-  });
-
-  console.log("mv.dev đã khởi tạo.");
+  console.log("mv.dev script đã khởi tạo.");
 })();
