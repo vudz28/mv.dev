@@ -699,3 +699,38 @@ a {
 .player-cover img[src=""] {
   display: none;
 }
+
+.mouse-particle {
+  position: fixed;
+  z-index: 9999;
+  width: var(--particle-size, 5px);
+  height: var(--particle-size, 5px);
+  border-radius: 50%;
+  background: var(--particle-color, #a18aff);
+  box-shadow: 0 0 8px var(--particle-color, #a18aff),
+              0 0 18px rgba(133, 111, 255, .45);
+  pointer-events: none;
+  animation: particle-float .85s ease-out forwards;
+}
+
+@keyframes particle-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -30%) scale(.4);
+  }
+  20% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate(
+      calc(-50% + var(--drift-x, 0px)),
+      calc(-50% - var(--rise, 45px))
+    ) scale(0);
+  }
+}
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .mouse-particle {
+    display: none;
+    animation: none;
+  }
+}
