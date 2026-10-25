@@ -734,3 +734,270 @@ a {
     animation: none;
   }
 }
+
+/* ===== MV.DEV START SCREEN ===== */
+.start-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #bca0ff;
+  background:
+    radial-gradient(ellipse at 50% 44%, #170c35 0%, #080510 40%, #030308 78%);
+  font-family: "Courier New", monospace;
+  transition: opacity .7s ease, visibility .7s ease;
+}
+
+.start-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .17;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    #a78bfa 4px
+  );
+}
+
+.start-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse, transparent 40%, #000 110%);
+}
+
+.start-screen.is-leaving {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.boot-info,
+.boot-version {
+  position: absolute;
+  top: 28px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #7861c7;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.boot-info {
+  left: 28px;
+}
+
+.boot-version {
+  right: 28px;
+  text-align: right;
+}
+
+.start-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  padding: 30px 16px;
+}
+
+.glitch-name {
+  position: relative;
+  margin: 0 0 55px;
+  color: #f4eaff;
+  font-size: clamp(32px, 7vw, 76px);
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-shadow:
+    0 0 5px #fff,
+    0 0 14px #a855f7,
+    0 0 35px #7c3aed;
+  animation: name-flicker 3s infinite;
+}
+
+.glitch-name::before,
+.glitch-name::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.glitch-name::before {
+  color: #55e7ff;
+  animation: glitch-blue 2.8s infinite steps(1);
+}
+
+.glitch-name::after {
+  color: #ff66df;
+  animation: glitch-pink 2.2s infinite steps(1);
+}
+
+@keyframes name-flicker {
+  0%, 18%, 22%, 60%, 64%, 100% { opacity: 1; }
+  20%, 62% { opacity: .76; }
+  21%, 63% { opacity: .96; }
+}
+
+@keyframes glitch-blue {
+  0%, 92%, 100% { clip-path: inset(0 0 100% 0); transform: none; }
+  93% { clip-path: inset(20% 0 60% 0); transform: translateX(-4px); }
+  95% { clip-path: inset(65% 0 10% 0); transform: translateX(3px); }
+}
+
+@keyframes glitch-pink {
+  0%, 88%, 100% { clip-path: inset(100% 0 0 0); transform: none; }
+  89% { clip-path: inset(45% 0 35% 0); transform: translateX(4px); }
+  91% { clip-path: inset(10% 0 75% 0); transform: translateX(-3px); }
+}
+
+.crt-computer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 65px;
+  filter: drop-shadow(0 0 18px #782eff);
+  animation: computer-flicker 2.8s infinite;
+}
+
+.crt-screen {
+  display: grid;
+  place-items: center;
+  width: 145px;
+  height: 112px;
+  border: 4px solid #a78bfa;
+  border-radius: 13px;
+  background: #0c0820;
+  box-shadow:
+    inset 0 0 22px #5b21b6,
+    0 0 10px #a855f7,
+    0 0 28px #6d28d9;
+}
+
+.crt-face {
+  color: #d9f7ff;
+  font-size: 44px;
+  text-shadow: 0 0 12px #a78bfa, 0 0 25px #7c3aed;
+  animation: face-blink 3s infinite;
+}
+
+.crt-neck {
+  width: 16px;
+  height: 19px;
+  background: linear-gradient(90deg, #4c1d95, #c4b5fd, #4c1d95);
+}
+
+.crt-base {
+  width: 85px;
+  height: 9px;
+  border: 2px solid #a78bfa;
+  border-radius: 5px;
+  box-shadow: 0 0 12px #7c3aed;
+}
+
+.crt-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  animation: crt-flash 3.2s infinite;
+}
+
+@keyframes computer-flicker {
+  0%, 94%, 97%, 100% { opacity: 1; }
+  95% { opacity: .55; }
+  96% { opacity: .9; }
+}
+
+@keyframes face-blink {
+  0%, 44%, 48%, 100% { opacity: 1; }
+  46% { opacity: .2; }
+}
+
+@keyframes crt-flash {
+  0%, 92%, 100% { opacity: 0; }
+  93% { opacity: .15; }
+  94% { opacity: 0; }
+}
+
+.start-button {
+  padding: 12px 20px;
+  border: 0;
+  background: transparent;
+  color: #c4a5ff;
+  font: inherit;
+  font-size: clamp(15px, 2.2vw, 23px);
+  letter-spacing: 5px;
+  cursor: pointer;
+  text-shadow: 0 0 12px #a855f7;
+  animation: button-pulse 1.5s ease-in-out infinite;
+}
+
+.start-button:hover,
+.start-button:focus-visible {
+  color: #fff;
+  text-shadow: 0 0 8px #fff, 0 0 25px #a855f7;
+  outline: none;
+}
+
+@keyframes button-pulse {
+  50% { opacity: .55; }
+}
+
+.start-footer {
+  position: absolute;
+  z-index: 2;
+  bottom: 35px;
+  width: min(420px, 80%);
+  text-align: center;
+  color: #7550c5;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.footer-line {
+  height: 20px;
+  border-top: 1px solid #6d28d9;
+  position: relative;
+}
+
+.footer-line span {
+  position: relative;
+  top: -12px;
+  padding: 0 15px;
+  background: #080510;
+  color: #b78bff;
+  font-size: 20px;
+}
+
+@media (max-height: 650px) {
+  .glitch-name { margin-bottom: 25px; }
+  .crt-computer { margin-bottom: 25px; }
+  .crt-screen { width: 115px; height: 85px; }
+  .start-footer { bottom: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glitch-name,
+  .glitch-name::before,
+  .glitch-name::after,
+  .crt-computer,
+  .crt-face,
+  .crt-flash,
+  .start-button {
+    animation: none;
+  }
+}
