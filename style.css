@@ -692,6 +692,9 @@ a {
   position: relative;
   z-index: 1;
 }
+.discord-activity[hidden] {
+  display: none !important;
+}
 
 .player-cover img[src=""] {
   display: none;
