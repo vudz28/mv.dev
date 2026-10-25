@@ -3,321 +3,262 @@
   "use strict";
 
   const config = window.CONFIG || {};
-  const $ = (id) => document.getElementById(id);
+  const $ = (selector) => document.querySelector(selector);
 
-  function setText(id, value) {
-    const el = $(id);
-    if (el && value !== undefined && value !== null && value !== "") {
-      el.textContent = value;
+  // ==========================================
+  // 1. CẤU HÌNH HỒ SƠ
+  // ==========================================
+
+  function setText(selector, value) {
+    const element = $(selector);
+    if (element && value !== undefined && value !== null) {
+      element.textContent = value;
+    }
+  }
+
+  function setImage(selector, url) {
+    const element = $(selector);
+    if (element && url) {
+      element.src = url;
+      element.style.display = "";
+    }
+  }
+
+  function setLink(selector, url) {
+    const element = $(selector);
+    if (element && url) {
+      element.href = url;
+      element.target = "_blank";
+      element.rel = "noopener noreferrer";
     }
   }
 
   function safeUrl(value) {
+    if (typeof value !== "string") return "";
+
     try {
       const url = new URL(value, window.location.href);
-      return ["https:", "http:"].includes(url.protocol) ? url.href : "";
-    } catch {
-      return "";
+      if (url.protocol === "https:" || url.protocol === "http:") {
+        return url.href;
+      }
+    } catch (_) {}
+
+    return "";
+  }
+
+  // Tên và mô tả
+  setText("#displayName", config.displayName || "mvu");
+  setText("#handle", config.handle || "@.minhhvu");
+  setText("#bio", config.bio || "Backend Developer");
+
+  // Ảnh nền và banner
+  const backgroundUrl = safeUrl(config.backgroundUrl);
+  if (backgroundUrl) {
+    document.body.style.backgroundImage =
+      `linear-gradient(rgba(5, 3, 12, .45), rgba(5, 3, 12, .75)), url("${backgroundUrl}")`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundAttachment = "fixed";
+  }
+
+  setImage("#banner", safeUrl(config.bannerUrl));
+  setImage("#musicCover", safeUrl(config.musicCoverUrl));
+
+  // Liên kết mạng xã hội
+  setLink("#discordLink", safeUrl(config.discordUrl));
+  setLink("#instagramLink", safeUrl(config.instagramUrl));
+  setLink("#facebookLink", safeUrl(config.facebookUrl));
+
+  // ==========================================
+  // 2. NHẠC NỀN
+  // Nhạc phát khi nhấn nút click to start
+  // ==========================================
+
+  const audio = $("#backgroundMusic");
+
+  if (audio) {
+    const audioUrl = safeUrl(config.musicAudioUrl);
+
+    audio.loop = true;
+    audio.volume = 0.5;
+    audio.preload = "auto";
+
+    if (audioUrl) {
+      audio.src = audioUrl;
+      audio.load();
     }
   }
 
-  function setImage(id, url) {
-    const image = $(id);
-    if (!image) return;
+  // ==========================================
+  // 3. MÀN HÌNH CHỜ
+  // ==========================================
 
-    const validUrl = safeUrl(url);
-    if (!validUrl) {
-      image.style.display = "none";
-      return;
+  const startScreen = $("#startScreen");
+  const startButton = $("#startButton");
+
+  let websiteStarted = false;
+
+  async function startWebsite(event) {
+    if (event) {
+      event.preventDefault();
     }
 
-    image.onerror = () => {
-      image.style.display = "none";
-    };
+    if (websiteStarted) return;
+    websiteStarted = true;
 
-    image.onload = () => {
-      image.style.display = "";
-    };
-
-    image.src = validUrl;
-  }
-
-  // Background image or animated video
-  function setBackground(url) {
-    const bg = $("background");
-    const validUrl = safeUrl(url);
-
-    if (!bg || !validUrl) return;
-
-    if (/\.(mp4|webm)(?:$|[?#])/i.test(validUrl)) {
-      const video = document.createElement("video");
-      video.src = validUrl;
-      video.autoplay = true;
-      video.loop = true;
-      video.muted = true;
-      video.playsInline = true;
-      video.setAttribute("aria-hidden", "true");
-
-      Object.assign(video.style, {
-        position: "absolute",
-        inset: "0",
-        width: "100%",
-        height: "100%",
-        objectFit: "cover"
-      });
-
-      bg.replaceChildren(video);
-      video.play().catch(() => {});
+    // Phát nhạc trực tiếp từ thao tác click của người dùng
+    if (audio && audio.src) {
+      try {
+        await audio.play();
+        console.log("Nhạc nền đang phát.");
+      } catch (error) {
+        console.error(
+          "Không thể phát nhạc. Hãy kiểm tra musicAudioUrl:",
+          error
+        );
+      }
     } else {
-      bg.style.backgroundImage =
-        `url("${validUrl.replace(/["\\\n\r]/g, "")}")`;
+      console.error(
+        "Chưa có đường dẫn nhạc hợp lệ trong config.js."
+      );
+    }
+
+    // Đóng màn hình chờ
+    if (startScreen) {
+      startScreen.classList.add("is-leaving");
+
+      window.setTimeout(() => {
+        startScreen.remove();
+      }, 500);
     }
   }
 
-  // Profile information
-  setText("displayName", config.displayName);
-  setText("handle", config.handle);
-  setText("bio", config.bio);
-  setText("musicTitle", config.musicTitle || "Now Playing");
-  setText("musicArtist", config.musicArtist || "No track detected");
+  if (startButton) {
+    startButton.addEventListener("click", startWebsite);
+  }
 
-  setImage("bannerImage", config.bannerUrl);
-  setImage("musicCover", config.musicCoverUrl);
-  setBackground(config.backgroundUrl);
+  // ==========================================
+  // 4. DISCORD PROFILE / LANYARD
+  // ==========================================
 
-  // Social links
-  [
-    ["discordLink", config.discordUrl],
-    ["instagramLink", config.instagramUrl],
-    ["facebookLink", config.facebookUrl]
-  ].forEach(([id, url]) => {
-    const link = $(id);
-    if (!link) return;
-
-    const validUrl = safeUrl(url);
-    if (validUrl) {
-      link.href = validUrl;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-    } else {
-      link.hidden = true;
-    }
-  });
-
-  // Default Discord avatar
-  const fallbackAvatar =
-    "https://cdn.discordapp.com/embed/avatars/0.png";
-
-  setImage("avatar", fallbackAvatar);
-
-  // Discord presence via Lanyard
   async function loadDiscord() {
-    const id = String(config.discordId || "").trim();
+    const discordId = String(config.discordId || "").trim();
 
-    if (!/^\d{17,20}$/.test(id)) {
-      setText("discordStatus", "DISCORD PROFILE");
+    if (!/^\d{17,20}$/.test(discordId)) {
+      console.warn("Discord ID chưa hợp lệ.");
       return;
     }
 
     try {
       const response = await fetch(
-        `https://api.lanyard.rest/v1/users/${encodeURIComponent(id)}`
+        `https://api.lanyard.rest/v1/users/${discordId}`
       );
 
-      if (!response.ok) throw new Error("Discord API unavailable");
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
 
       const result = await response.json();
+
       if (!result.success || !result.data) {
-        throw new Error("No Discord data");
+        throw new Error("Không lấy được dữ liệu Discord.");
       }
 
       const data = result.data;
-      const user = data.discord_user;
+      const user = data.discord_user || {};
 
-      if (user) {
-        const avatarUrl = user.avatar
-          ? `https://cdn.discordapp.com/avatars/${id}/${user.avatar}.${user.avatar.startsWith("a_") ? "gif" : "webp"}?size=256`
-          : fallbackAvatar;
+      const discordName =
+        user.global_name || user.display_name || user.username || "Discord";
 
-        setImage("avatar", avatarUrl);
-      }
+      setText("#discordName", discordName);
+      setText("#discordUsername", user.username ? `@${user.username}` : "");
 
-      // Badges
-      const badges = $("badges");
-      if (badges) {
-        badges.replaceChildren();
-
-        const discordBadge = document.createElement("span");
-        discordBadge.className = "badge discord-badge";
-        discordBadge.textContent = "✦ Discord";
-        badges.appendChild(discordBadge);
-
-        const flags = Number(user?.public_flags || 0);
-        const badgeNames = [];
-
-        if (flags & (1 << 0)) badgeNames.push("Staff");
-        if (flags & (1 << 1)) badgeNames.push("Partner");
-        if (flags & (1 << 2)) badgeNames.push("HypeSquad");
-        if (flags & (1 << 17)) badgeNames.push("Active Developer");
-
-        badgeNames.forEach((name) => {
-          const badge = document.createElement("span");
-          badge.className = "badge discord-badge";
-          badge.textContent = name;
-          badges.appendChild(badge);
-        });
-      }
-
-      // Discord status
-      const status = data.discord_status || "offline";
-      const statusLabels = {
-        online: "ONLINE ON DISCORD",
-        idle: "IDLE ON DISCORD",
-        dnd: "DO NOT DISTURB",
-        offline: "OFFLINE ON DISCORD"
+      // Trạng thái Discord
+      const statusNames = {
+        online: "Online",
+        idle: "Idle",
+        dnd: "Do Not Disturb",
+        offline: "Offline"
       };
 
-      setText("discordStatus", statusLabels[status] || "OFFLINE ON DISCORD");
-      setText("activityText", "DISCORD STATUS");
+      setText(
+        "#discordStatus",
+        statusNames[data.discord_status] || "Offline"
+      );
 
-      // Current activity
-      const activities = data.activities || [];
-      const activity = activities.find((item) => item.type !== 4);
-      const activityBox = $("discordActivity");
+      const statusElement = $("#discordStatus");
+      if (statusElement) {
+        statusElement.dataset.status = data.discord_status || "offline";
+      }
 
-      if (activity && activityBox) {
-        activityBox.hidden = false;
-        setText("activityName", activity.name || "Playing");
-        setText(
-          "activityDetails",
-          activity.details || activity.state || ""
+      // Avatar Discord
+      if (user.id && user.avatar) {
+        const extension = user.avatar.startsWith("a_")
+          ? "gif"
+          : "png";
+
+        setImage(
+          "#discordAvatar",
+          `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${extension}?size=256`
         );
-      } else if (activityBox) {
-        activityBox.hidden = true;
       }
 
-      // Spotify Now Playing
-      if (data.spotify) {
-        setText("musicTitle", data.spotify.song);
-        setText("musicArtist", data.spotify.artist);
-        setImage("musicCover", data.spotify.album_art_url);
+      // Banner Discord
+      if (user.id && user.banner) {
+        const extension = user.banner.startsWith("a_")
+          ? "gif"
+          : "png";
+
+        setImage(
+          "#discordBanner",
+          `https://cdn.discordapp.com/banners/${user.id}/${user.banner}.${extension}?size=1024`
+        );
       }
+
+      // Spotify / hoạt động đang diễn ra
+      const spotify = data.spotify;
+
+      if (spotify && spotify.song) {
+        setText("#spotifyTitle", spotify.song);
+        setText("#spotifyArtist", spotify.artist || "");
+        setImage("#spotifyCover", spotify.album_art_url || "");
+        setText("#musicTitle", spotify.song);
+        setText("#musicArtist", spotify.artist || "");
+      } else {
+        const activities = data.activities || [];
+        const activity = activities.find(
+          (item) => item.type !== 4 && item.name
+        );
+
+        if (activity) {
+          setText("#discordActivity", activity.name);
+          setText("#discordActivityDetails", activity.details || "");
+        }
+      }
+
+      console.log("Đã cập nhật thông tin Discord.");
     } catch (error) {
-      console.warn("Discord data could not be loaded:", error);
-      setText("discordStatus", "DISCORD PROFILE");
+      console.warn("Không tải được Discord/Lanyard:", error);
     }
   }
 
   loadDiscord();
 
-  // Background music
-  const audio = $("backgroundMusic");
-  const audioUrl = safeUrl(config.musicAudioUrl || "");
+  // ==========================================
+  // 5. THÔNG TIN BÀI NHẠC CỐ ĐỊNH
+  // ==========================================
 
-  if (audio && audioUrl) {
-    audio.src = audioUrl;
-    audio.volume = 0.35;
-    audio.loop = true;
-
-    let started = false;
-
-    const startMusic = () => {
-      if (started) return;
-
-      audio.play().then(() => {
-        started = true;
-        document.removeEventListener("pointerdown", startMusic);
-        document.removeEventListener("keydown", startMusic);
-      }).catch(() => {});
-    };
-
-    startMusic();
-    document.addEventListener("pointerdown", startMusic);
-    document.addEventListener("keydown", startMusic);
+  if (config.musicTitle) {
+    setText("#musicTitle", config.musicTitle);
+    setText("#spotifyTitle", config.musicTitle);
   }
 
-  // Mouse particle effect
-  const reducedMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
-  const touchDevice = window.matchMedia("(hover: none)").matches;
-
-  if (!reducedMotion && !touchDevice) {
-    let lastParticleTime = 0;
-    let particleCount = 0;
-
-    document.addEventListener("pointermove", (event) => {
-      const now = performance.now();
-
-      if (now - lastParticleTime < 28 || particleCount >= 35) return;
-
-      lastParticleTime = now;
-      particleCount++;
-
-      const particle = document.createElement("span");
-      particle.className = "mouse-particle";
-
-      const colors = ["#a18aff", "#7bc6ff", "#e0a8ff"];
-
-      particle.style.left = `${event.clientX}px`;
-      particle.style.top = `${event.clientY}px`;
-      particle.style.setProperty(
-        "--particle-color",
-        colors[Math.floor(Math.random() * colors.length)]
-      );
-      particle.style.setProperty(
-        "--particle-size",
-        `${3 + Math.random() * 5}px`
-      );
-      particle.style.setProperty(
-        "--drift-x",
-        `${(Math.random() - 0.5) * 65}px`
-      );
-      particle.style.setProperty(
-        "--rise",
-        `${25 + Math.random() * 55}px`
-      );
-
-      document.body.appendChild(particle);
-
-      particle.addEventListener("animationend", () => {
-        particle.remove();
-        particleCount = Math.max(0, particleCount - 1);
-      }, { once: true });
-    }, { passive: true });
+  if (config.musicArtist) {
+    setText("#musicArtist", config.musicArtist);
+    setText("#spotifyArtist", config.musicArtist);
   }
 
-  // Start screen: reveal the existing website and attempt music playback
-  const startScreen = $("startScreen");
-  const startButton = $("startButton");
-  const backgroundMusic = $("backgroundMusic");
+  // Không tự động phát nhạc khi tải trang.
+  // Nhạc chỉ bắt đầu khi người dùng nhấn click to start.
 
-  function startWebsite() {
-    if (startScreen) {
-      startScreen.classList.add("is-leaving");
-
-      // Remove overlay after the transition finishes
-      window.setTimeout(() => {
-        startScreen.remove();
-      }, 750);
-    }
-
-    if (backgroundMusic) {
-      backgroundMusic.volume = 0.35;
-      backgroundMusic.play().catch(() => {
-        // Playback may fail if the audio URL is not a direct audio file.
-      });
-    }
-  }
-
-  if (startScreen) {
-    startScreen.addEventListener("click", startWebsite, { once: true });
-  }
-
-  if (startButton) {
-    startButton.addEventListener("click", (event) => {
-      event.stopPropagation();
-      startWebsite();
-    }, { once: true });
-  }  
 })();
