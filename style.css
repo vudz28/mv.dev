@@ -629,3 +629,70 @@ a {
     transition-duration: .01ms !important;
   }
 }
+
+.discord-activity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 13px;
+  border: 1px solid rgba(149, 128, 255, .18);
+  border-radius: 14px;
+  background: rgba(149, 128, 255, .06);
+}
+
+.activity-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: rgba(149, 128, 255, .12);
+  font-size: 20px;
+}
+
+.discord-activity strong {
+  font-size: 12px;
+}
+
+.discord-activity p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+#activityDot {
+  display: inline-block;
+  position: static;
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border: 0;
+}
+
+#activityDot.online {
+  background: #43e6a0;
+}
+
+#activityDot.idle {
+  background: #f4bd50;
+}
+
+#activityDot.dnd {
+  background: #ff5d6c;
+}
+
+#activityDot.offline {
+  background: #85879a;
+}
+
+.player-cover img {
+  position: relative;
+  z-index: 1;
+}
+
+.player-cover img[src=""] {
+  display: none;
+}
