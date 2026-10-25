@@ -221,4 +221,130 @@ if (data.spotify) {
   }
 
   loadDiscord();
+  
+  // Background music
+  const audio = $("backgroundMusic");
+  const audioUrl = safeUrl(config.musicAudioUrl || "");
+
+  if (audio && audioUrl) {
+    audio.src = audioUrl;
+    audio.volume = 0.35;
+    audio.loop = true;
+
+    const tryAutoplay = () => {
+      audio.play().catch(() => {
+        // Trình duyệt chặn autoplay có tiếng:
+        // chờ lần tương tác đầu tiên của người dùng.
+        const startMusic = () => {
+          audio.play().catch(() => {});
+          document.removeEventListener("pointerdown", startMusic);
+          document.removeEventListener("keydown", startMusic);
+        };
+
+        document.addEventListener("pointerdown", startMusic);
+        document.addEventListener("keydown", startMusic);
+      });
+    };
+
+    tryAutoplay();
+  }
+```
+
+**Lưu ý:** không thể đảm bảo nhạc phát ra tiếng ngay khi vừa mở trang trên mọi trình duyệt. Chrome và Safari thường yêu cầu người dùng tương tác trước khi cho phép tự phát có âm thanh. Đoạn code sẽ thử tự phát, rồi thử lại khi bạn chạm hoặc nhấn phím.
+
+## 5. Thêm hiệu ứng hạt sáng bay lên theo chuột
+
+Dán đoạn này vào cuối `style.css`:
+
+<CodeBlock language="css" editable>
+/* Mouse trail particles */
+.mouse-particle {
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: var(--particle-size, 5px);
+  height: var(--particle-size, 5px);
+  border-radius: 50%;
+  background: var(--particle-color, #a18aff);
+  box-shadow:
+    0 0 8px var(--particle-color, #a18aff),
+    0 0 18px rgba(133, 111, 255, .45);
+  pointer-events: none;
+  animation: particle-float .85s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes particle-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -30%) scale(.4);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate(
+        calc(-50% + var(--drift-x, 0px)),
+        calc(-50% - var(--rise, 45px))
+      )
+      scale(0);
+  }
+}
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .mouse-particle {
+    display: none;
+    animation: none;
+  }
+}
+
+  // Mouse glow trail
+  const reducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+  const touchDevice = window.matchMedia("(hover: none)").matches;
+
+  if (!reducedMotion && !touchDevice) {
+    let lastParticleTime = 0;
+    let particleCount = 0;
+
+    document.addEventListener("pointermove", (event) => {
+      const now = performance.now();
+
+      // Giới hạn số hạt để tránh làm chậm trang.
+      if (now - lastParticleTime < 28 || particleCount >= 35) {
+        return;
+      }
+
+      lastParticleTime = now;
+      particleCount++;
+
+      const particle = document.createElement("span");
+      particle.className = "mouse-particle";
+
+      const colors = ["#a18aff", "#7bc6ff", "#e0a8ff"];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const size = 3 + Math.random() * 5;
+      const drift = (Math.random() - 0.5) * 65;
+      const rise = 25 + Math.random() * 55;
+
+      particle.style.left = `${event.clientX}px`;
+      particle.style.top = `${event.clientY}px`;
+      particle.style.setProperty("--particle-color", color);
+      particle.style.setProperty("--particle-size", `${size}px`);
+      particle.style.setProperty("--drift-x", `${drift}px`);
+      particle.style.setProperty("--rise", `${rise}px`);
+
+      document.body.appendChild(particle);
+
+      particle.addEventListener("animationend", () => {
+        particle.remove();
+        particleCount = Math.max(0, particleCount - 1);
+      }, { once: true });
+    }, { passive: true });
+  }
+
 })();
