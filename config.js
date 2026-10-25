@@ -1,5 +1,5 @@
 
-const CONFIG = {
+window.CONFIG = {
   backgroundUrl: "https://giffiles.alphacoders.com/215/215982.gif",
 
   discordId: "702056566051962930",
