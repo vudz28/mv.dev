@@ -166,47 +166,47 @@
 
       // Trạng thái hiện diện.
      
+
 const status = data.discord_status || "offline";
-const dot = document.querySelector(".status-dot");
-
-dot.classList.remove("online", "idle", "dnd", "offline");
-dot.classList.add(status);
-dot.title = `Discord: ${status}`;
-
 const statusLabels = {
-  online: "ĐANG ONLINE",
-  idle: "ĐANG CHỜ",
-  dnd: "KHÔNG LÀM PHIỀN",
-  offline: "ĐANG OFFLINE"
+  online: "ONLINE ON DISCORD",
+  idle: "IDLE ON DISCORD",
+  dnd: "DO NOT DISTURB",
+  offline: "OFFLINE ON DISCORD"
 };
 
-setText("discordStatus", statusLabels[status] || "DISCORD");
+setText("discordStatus", statusLabels[status] || "IDLE ON DISCORD");
 setText("activityText", "DISCORD STATUS");
 
-const activity = (data.activities || []).find(
-  item => item.type !== 4
-);
+// Chỉ hiện hoạt động khi Discord thực sự có hoạt động.
+// Không hiện dòng "Chưa có hoạt động" khi danh sách rỗng.
+const activities = data.activities || [];
+const activity = activities.find(item => item.type !== 4);
+const activityBox = $("discordActivity");
 
 if (activity) {
+  activityBox.hidden = false;
   setText("activityName", activity.name || "Đang hoạt động");
   setText(
     "activityDetails",
-    activity.details || activity.state || "Đang sử dụng Discord"
+    activity.details || activity.state || ""
   );
 } else {
-  setText("activityName", "Chưa có hoạt động");
-  setText("activityDetails", "Mở game hoặc ứng dụng để chia sẻ trạng thái");
+  activityBox.hidden = true;
+  setText("discordStatus", "IDLE ON DISCORD");
 }
 
+// Spotify Now Playing
 if (data.spotify) {
   setText("musicTitle", data.spotify.song);
   setText("musicArtist", data.spotify.artist);
   setImage("musicCover", data.spotify.album_art_url);
 } else {
-  setText("musicTitle", config.musicTitle || "Chưa phát nhạc");
-  setText("musicArtist", config.musicArtist || "Spotify chưa chia sẻ bài hát");
+  setText("musicTitle", config.musicTitle || "Now Playing");
+  setText("musicArtist", config.musicArtist || "No track detected");
   setImage("musicCover", config.musicCoverUrl);
 }
+
 
       // Nếu đang chia sẻ Spotify, cập nhật bài hát.
       if (data.spotify) {
