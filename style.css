@@ -1001,3 +1001,119 @@ a {
     animation: none;
   }
 }
+
+#startScreen.start-screen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #05030b !important;
+  color: #c4b5fd;
+  font-family: "Courier New", monospace;
+}
+
+#startScreen .boot-info,
+#startScreen .boot-version,
+#startScreen .start-footer {
+  position: absolute;
+  font-size: 12px;
+  color: #8b75c9;
+}
+
+#startScreen .boot-info {
+  top: 24px;
+  left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#startScreen .boot-version {
+  top: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: right;
+}
+
+#startScreen .start-content {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+#startScreen .glitch-name {
+  margin: 0 0 35px;
+  font: normal 36px "Courier New", monospace;
+  color: #c4b5fd;
+  text-shadow: 0 0 10px #7c3aed;
+  animation: none !important;
+}
+
+#startScreen .glitch-name::before,
+#startScreen .glitch-name::after {
+  content: none !important;
+  display: none !important;
+}
+
+#startScreen .crt-computer {
+  display: none !important;
+}
+
+#startScreen .start-content::after {
+  content: "</>";
+  margin: 0 0 35px;
+  color: #a78bfa;
+  font: bold 58px monospace;
+  text-shadow: 0 0 16px #7c3aed;
+}
+
+#startScreen .start-button {
+  border: 0;
+  padding: 12px;
+  background: transparent;
+  color: #c4b5fd;
+  font: 18px monospace;
+  letter-spacing: 4px;
+  cursor: pointer;
+}
+
+#startScreen .start-button:hover {
+  color: white;
+}
+
+#startScreen .start-footer {
+  bottom: 20px;
+  text-align: center;
+}
+
+#startScreen .start-footer p {
+  margin-top: 12px;
+}
+
+#startScreen.is-leaving {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .5s ease, visibility .5s ease;
+}
+
+@media (max-width: 600px) {
+  #startScreen .boot-info,
+  #startScreen .boot-version {
+    font-size: 9px;
+  }
+
+  #startScreen .glitch-name {
+    font-size: 29px;
+  }
+
+  #startScreen .start-button {
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+}
