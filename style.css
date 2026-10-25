@@ -1149,3 +1149,43 @@ a {
     width: 100%;
   }
 }
+
+/* FIX LAYOUT: khôi phục chiều rộng toàn bộ website */
+html,
+body {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.page,
+.profile-layout {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.profile-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.profile-card,
+.profile-content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+#discordActivity {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+}
