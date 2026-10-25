@@ -165,19 +165,48 @@
       });
 
       // Trạng thái hiện diện.
-      const status = data.discord_status || "offline";
-      const dot = document.querySelector(".status-dot");
-      dot.classList.toggle("online", status === "online");
-      dot.title = `Discord: ${status}`;
+     
+const status = data.discord_status || "offline";
+const dot = document.querySelector(".status-dot");
 
-      const statusLabels = {
-        online: "ONLINE ON DISCORD",
-        idle: "IDLE ON DISCORD",
-        dnd: "DO NOT DISTURB",
-        offline: "OFFLINE ON DISCORD"
-      };
+dot.classList.remove("online", "idle", "dnd", "offline");
+dot.classList.add(status);
+dot.title = `Discord: ${status}`;
 
-      setText("discordStatus", statusLabels[status] || "DISCORD PROFILE");
+const statusLabels = {
+  online: "ĐANG ONLINE",
+  idle: "ĐANG CHỜ",
+  dnd: "KHÔNG LÀM PHIỀN",
+  offline: "ĐANG OFFLINE"
+};
+
+setText("discordStatus", statusLabels[status] || "DISCORD");
+setText("activityText", "DISCORD STATUS");
+
+const activity = (data.activities || []).find(
+  item => item.type !== 4
+);
+
+if (activity) {
+  setText("activityName", activity.name || "Đang hoạt động");
+  setText(
+    "activityDetails",
+    activity.details || activity.state || "Đang sử dụng Discord"
+  );
+} else {
+  setText("activityName", "Chưa có hoạt động");
+  setText("activityDetails", "Mở game hoặc ứng dụng để chia sẻ trạng thái");
+}
+
+if (data.spotify) {
+  setText("musicTitle", data.spotify.song);
+  setText("musicArtist", data.spotify.artist);
+  setImage("musicCover", data.spotify.album_art_url);
+} else {
+  setText("musicTitle", config.musicTitle || "Chưa phát nhạc");
+  setText("musicArtist", config.musicArtist || "Spotify chưa chia sẻ bài hát");
+  setImage("musicCover", config.musicCoverUrl);
+}
 
       // Nếu đang chia sẻ Spotify, cập nhật bài hát.
       if (data.spotify) {
