@@ -1117,3 +1117,35 @@ a {
     letter-spacing: 2px;
   }
 }
+
+/* FIX: khôi phục chiều rộng khung Discord */
+#discordActivity {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 280px;
+  max-width: 100%;
+  flex: 1 1 280px;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+
+#discordActivity * {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#activityName,
+#activityDetails,
+#activityText {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 480px) {
+  #discordActivity {
+    min-width: 0;
+    width: 100%;
+  }
+}
